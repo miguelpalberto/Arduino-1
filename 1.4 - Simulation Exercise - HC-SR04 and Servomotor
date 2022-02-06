@@ -1,0 +1,89 @@
+
+#include <Servo.h>
+
+const int trigPin = 3;
+const int echoPin = 4;
+const int trigPin2 = 5;
+const int echoPin2 = 6;
+
+Servo myservo;  // create servo object to control a servo
+
+
+void setup() {
+  
+	Serial.begin (9600);
+  
+	pinMode(trigPin, OUTPUT);
+	pinMode(echoPin, INPUT);
+  	pinMode(trigPin2, OUTPUT);
+	pinMode(echoPin2, INPUT);
+  
+	digitalWrite(trigPin, LOW);
+  	digitalWrite(trigPin2, LOW);
+	delayMicroseconds(2);
+    myservo.attach(9);  // attaches the servo on pin 9 to the servo object
+}
+void loop() {
+  
+	unsigned long duration;
+  	float distanciaM = 100; //distancia em metros a começar longe
+  	float distanciaCM; //distancia em cm
+  	float durationS; //duracao em segundos
+  	unsigned long duration2;
+  	float distanciaM2; //distancia em metros
+  	float distanciaCM2 = 1000; //distancia em cm
+  	float durationS2; //duracao em segundos
+
+  
+	digitalWrite(trigPin, HIGH);
+  	delayMicroseconds(10);
+  	digitalWrite(trigPin, LOW);
+ 	duration = pulseIn(echoPin, HIGH);
+  
+  	durationS = (float)duration/1000/1000; //duracao em segundos - REVER
+  	distanciaM = 343*durationS/2;
+  	distanciaCM = distanciaM*100;
+
+  ////////////
+  //veiculo proximo:
+  if(distanciaM < 0.5){
+    
+    digitalWrite(trigPin2, HIGH);
+    delayMicroseconds(10);
+ 	digitalWrite(trigPin2, LOW);
+    duration2 = pulseIn(echoPin2, HIGH);
+    
+  	durationS2 = (float)duration2/1000/1000; //duracao em segundos - REVER
+  	distanciaM2 = 343*durationS2/2;
+  	distanciaCM2 = distanciaM2*100;
+    
+	analogWrite(10,255); // led ligado
+   
+    if(distanciaM2 >= 0.3){
+      
+      myservo.write(95);              // tell servo to go to position in variable 'pos'
+	  noTone(8);
+    }
+    //veiculo pesado:
+    else{
+    myservo.write(5); // cancela (servomotor)
+    tone(8,440); //aviso sonoro
+    }
+  }
+  else{
+  	analogWrite(10,(0.1*255)); //led semidesligado
+    noTone(8);
+    myservo.write(5); 
+
+  }
+  
+  	Serial.print(duration); //
+	Serial.println(" microssegundos");
+  	Serial.print(distanciaCM); //
+	Serial.println(" cm");
+    Serial.print(duration2); //
+	Serial.println(" microssegundos 2");
+  	Serial.print(distanciaCM2); //
+	Serial.println(" cm 2");
+	delay(1);
+}
